@@ -2,6 +2,7 @@ package com.quickboard.resourcepost.board.entity;
 
 import com.quickboard.resourcepost.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,7 +20,7 @@ public class Board extends BaseEntity {
     private Long id;
 
     @Setter
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
     @Setter
@@ -28,4 +29,11 @@ public class Board extends BaseEntity {
     @Column(name = "is_writable", nullable = false)
     @Setter
     private Boolean isWritable;
+
+    @Builder
+    public Board(String name, String description, Boolean isWritable) {
+        this.name = name;
+        this.description = description;
+        this.isWritable = isWritable;
+    }
 }
