@@ -1,6 +1,7 @@
 package com.quickboard.resourcepost.boardadmin.entity;
 
 import com.quickboard.resourcepost.board.entity.Board;
+import com.quickboard.resourcepost.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "board_admins")
 @Getter
 @NoArgsConstructor
-public class BoardAdmin {
+public class BoardAdmin extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

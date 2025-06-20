@@ -1,5 +1,6 @@
 package com.quickboard.resourcepost.board.entity;
 
+import com.quickboard.resourcepost.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import org.hibernate.annotations.DynamicInsert;
 @DynamicInsert
 @Getter
 @NoArgsConstructor
-public class Board {
+public class Board extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,5 +1,6 @@
 package com.quickboard.resourcepost.comment.entity;
 
+import com.quickboard.resourcepost.common.entity.BaseEntity;
 import com.quickboard.resourcepost.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import org.hibernate.annotations.DynamicInsert;
 @DynamicInsert
 @Getter
 @NoArgsConstructor
-public class Comment {
+public class Comment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
