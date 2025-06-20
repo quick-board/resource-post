@@ -1,45 +1,35 @@
-package com.quickboard.resourcepost.post.entity;
+package com.quickboard.resourcepost.comment.entity;
 
-import com.quickboard.resourcepost.board.entity.Board;
+import com.quickboard.resourcepost.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
 
 @Entity
-@Table(name = "posts")
+@Table(name = "comments")
 @DynamicInsert
 @Getter
 @NoArgsConstructor
-public class Post {
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    @Setter
-    private String title;
-
-    @Lob
-    @Setter
     private String content;
 
     @Column(nullable = false)
-    @Setter
     private Integer likes;
 
     @ManyToOne
-    @JoinColumn(name = "board_id")
-    private Board board;
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
     @Column(name = "writer_id")
     private Long writerId;
 
-    @Setter
+    @Column(name = "guest_password")
     private String guestPassword;
-
-    //todo createdAt, updatedAt 추가
-    //todo @DynamicInsert와 디폴트 추가
 }
