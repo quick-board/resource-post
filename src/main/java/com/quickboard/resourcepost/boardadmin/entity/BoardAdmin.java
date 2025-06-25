@@ -4,6 +4,7 @@ import com.quickboard.resourcepost.board.entity.Board;
 import com.quickboard.resourcepost.common.entity.BaseEntity;
 import com.quickboard.resourcepost.profile.entity.Profile;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,4 +25,10 @@ public class BoardAdmin extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "admin_id", nullable = false)
     private Profile profile;
+
+    @Builder
+    public BoardAdmin(Board board, Profile profile) {
+        this.board = board;
+        this.profile = profile;
+    }
 }

@@ -4,6 +4,7 @@ import com.quickboard.resourcepost.common.entity.BaseEntity;
 import com.quickboard.resourcepost.post.entity.Post;
 import com.quickboard.resourcepost.profile.entity.Profile;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
@@ -35,4 +36,10 @@ public class Comment extends BaseEntity {
 
     @Column(name = "guest_password")
     private String guestPassword;
+
+    @Builder
+    public Comment(String content, Post post) {
+        this.content = content;
+        this.post = post;
+    }
 }
