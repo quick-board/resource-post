@@ -16,7 +16,7 @@ spring:
       hibernate:
         format_sql: true #실행되는 sql 보여줌
         jdbc:
-          time_zone: UTC #todo UTC 테스트 하기
+          time_zone: UTC
   h2:
     console:
       enabled: true
