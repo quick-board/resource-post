@@ -23,8 +23,8 @@ public class Profile extends BaseEntity {
     private Long id;
 
     @Setter
-    @Column(name = "credential_id")
-    private Long credentialId;
+    @Column(name = "account_id")
+    private Long accountId;
 
     @Setter
     @Column(nullable = false)
@@ -47,8 +47,8 @@ public class Profile extends BaseEntity {
     private LocalDate birthDate;
 
     @Builder
-    public Profile(Long credentialId, String nickname, String firstName, String lastName, Gender gender, LocalDate birthDate) {
-        this.credentialId = credentialId;
+    public Profile(Long accountId, String nickname, String firstName, String lastName, Gender gender, LocalDate birthDate) {
+        this.accountId = accountId;
         this.nickname = nickname;
         this.firstName = firstName;
         this.lastName = lastName;

@@ -4,6 +4,7 @@ import com.quickboard.resourcepost.board.entity.Board;
 import com.quickboard.resourcepost.common.entity.BaseEntity;
 import com.quickboard.resourcepost.profile.entity.Profile;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,6 +43,13 @@ public class Post extends BaseEntity {
 
     @Setter
     private String guestPassword;
+
+    @Builder
+    public Post(String title, String content, Board board) {
+        this.title = title;
+        this.content = content;
+        this.board = board;
+    }
 
     //todo 스키마에 디폴트값 추가
 }
