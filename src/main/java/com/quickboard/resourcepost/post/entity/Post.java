@@ -2,6 +2,7 @@ package com.quickboard.resourcepost.post.entity;
 
 import com.quickboard.resourcepost.board.entity.Board;
 import com.quickboard.resourcepost.common.entity.BaseEntity;
+import com.quickboard.resourcepost.profile.entity.Profile;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,12 +36,12 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "board_id")
     private Board board;
 
-    @Column(name = "writer_id")
-    private Long writerId;
+    @ManyToOne
+    @JoinColumn(name = "writer_id")
+    private Profile profile;
 
     @Setter
     private String guestPassword;
 
-    //todo createdAt, updatedAt 추가
-    //todo @DynamicInsert와 디폴트 추가
+    //todo 스키마에 디폴트값 추가
 }

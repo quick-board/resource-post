@@ -2,6 +2,7 @@ package com.quickboard.resourcepost.comment.entity;
 
 import com.quickboard.resourcepost.common.entity.BaseEntity;
 import com.quickboard.resourcepost.post.entity.Post;
+import com.quickboard.resourcepost.profile.entity.Profile;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,8 +29,9 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @Column(name = "writer_id")
-    private Long writerId;
+    @ManyToOne
+    @JoinColumn(name = "writer_id", nullable = false)
+    private Profile profile;
 
     @Column(name = "guest_password")
     private String guestPassword;

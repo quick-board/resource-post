@@ -1,4 +1,10 @@
 spring:
   application:
-  name: resource post
-
+    name: resource post
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  jackson:
+    time-zone: UTC
