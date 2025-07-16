@@ -1,8 +1,6 @@
 package com.quickboard.resourcepost.post.entity;
 
-import com.quickboard.resourcepost.board.entity.Board;
 import com.quickboard.resourcepost.common.entity.BaseEntity;
-import com.quickboard.resourcepost.profile.entity.Profile;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,27 +27,20 @@ public class Post extends BaseEntity {
     @Setter
     private String content;
 
-    @Column(nullable = false)
-    @Setter
-    private Integer likes;
+    @Column(name = "board_id", nullable = false)
+    private Long boardId;
 
-    @ManyToOne
-    @JoinColumn(name = "board_id")
-    private Board board;
+    @Column(name = "profile_id")
+    private Long profileId;
 
-    @ManyToOne
-    @JoinColumn(name = "writer_id")
-    private Profile profile;
-
-    @Setter
     private String guestPassword;
 
     @Builder
-    public Post(String title, String content, Board board) {
+    public Post(String title, String content, Long boardId, Long profileId, String guestPassword) {
         this.title = title;
         this.content = content;
-        this.board = board;
+        this.boardId = boardId;
+        this.profileId = profileId;
+        this.guestPassword = guestPassword;
     }
-
-    //todo 스키마에 디폴트값 추가
 }
