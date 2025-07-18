@@ -35,4 +35,6 @@ public class Like extends BaseEntity {
         this.profileId = profileId;
         this.guestUuid = guestUuid;
     }
+
+    //todo post삭제되면 같이 삭제되게 제약 추가
 }
