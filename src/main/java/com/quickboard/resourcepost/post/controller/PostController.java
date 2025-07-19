@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,6 +23,7 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("/boards/{id}/posts")
+    @ResponseStatus(HttpStatus.OK)
     public Page<PostResponse> getAllPosts(@PathVariable("id") Long boardId,
                                           @ModelAttribute @ParameterObject PostSearchCondition searchCondition,
                                           @ParameterObject @PageableDefault(size = 20, sort = "created-at", direction = Sort.Direction.DESC)
@@ -30,23 +32,27 @@ public class PostController {
     }
 
     @GetMapping("/posts/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public PostResponse getPostById(@PathVariable("id") Long postId){
         return postService.searchPostById(postId);
     }
 
     @PostMapping("/boards/{id}/posts")
+    @ResponseStatus(HttpStatus.CREATED)
     public void postPost(@PathVariable("id") Long boardId,
                          @RequestBody PostCreatePayload payload){
         postService.postPost(boardId, payload);
     }
 
     @PatchMapping("/posts/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchPost(@PathVariable("id") Long postId,
                           @RequestBody PostUpdatePayload payload){
         postService.patchPost(postId, payload);
     }
 
     @DeleteMapping("/posts/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePost(@PathVariable("id") Long postId,
                            @RequestBody AuthorCredential authorCredential){
         postService.deletePost(postId, authorCredential);
