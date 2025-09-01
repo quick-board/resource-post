@@ -1,6 +1,6 @@
 package com.quickboard.resourcepost.like.service.impl;
 
-import com.quickboard.resourcepost.common.dto.AuthorIdentity;
+import com.quickboard.resourcepost.common.security.dto.Passport;
 import com.quickboard.resourcepost.like.entity.Like;
 import com.quickboard.resourcepost.like.exception.impl.LikeAuthorFormatException;
 import com.quickboard.resourcepost.like.exception.impl.LikeNotFoundException;
@@ -23,16 +23,16 @@ public class LikeServiceImpl implements LikeService {
 
     @Transactional
     @Override
-    public void postLikeProcess(Long postId, AuthorIdentity authorIdentity) {
-        if(!isValidFormat(authorIdentity)){
+    public void postLikeProcess(Long postId, Passport passport) {
+        if(!isValidFormat(passport)){
             throw new LikeAuthorFormatException();
         }
 
         Post refPost = entityManager.getReference(Post.class, postId);
         Like newObject = Like.builder()
                 .post(refPost)
-                .profileId(authorIdentity.profileId())
-                .guestUuid(authorIdentity.guestUuid())
+                .profileId(passport.userId())
+                .guestUuid(passport.guestId())
                 .build();
 
         likeRepository.save(newObject);
@@ -40,17 +40,17 @@ public class LikeServiceImpl implements LikeService {
 
     @Transactional
     @Override
-    public void deleteLikeProcess(Long postId, AuthorIdentity authorIdentity) {
-        if(!isValidFormat(authorIdentity)){
+    public void deleteLikeProcess(Long postId, Passport passport) {
+        if(!isValidFormat(passport)){
             throw new LikeAuthorFormatException();
         }
         int result;
 
-        if(Objects.nonNull(authorIdentity.profileId())){
-            result = likeRepository.deleteByPostIdAndProfileId(postId, authorIdentity.profileId());
+        if(Objects.nonNull(passport.userId())){
+            result = likeRepository.deleteByPostIdAndProfileId(postId, passport.userId());
         }
         else {
-            result = likeRepository.deleteByPostAndGuestUuid(postId, authorIdentity.guestUuid());
+            result = likeRepository.deleteByPostAndGuestUuid(postId, passport.guestId());
         }
 
         if(result >= 2){
@@ -62,16 +62,16 @@ public class LikeServiceImpl implements LikeService {
 
     }
 
-    private static boolean isValidFormat(AuthorIdentity authorIdentity){
-        boolean isMember = Objects.nonNull(authorIdentity.profileId());
-        boolean isGuest = Objects.nonNull(authorIdentity.guestUuid());
+    private static boolean isValidFormat(Passport passport){
+        boolean isMember = Objects.nonNull(passport.userId());
+        boolean isGuest = Objects.nonNull(passport.guestId());
 
         return isMember != isGuest;
     }
 
-    private static boolean isOwner(Like like, AuthorIdentity authorIdentity){
-        boolean member = Objects.isNull(like.getGuestUuid()) && Objects.equals(like.getProfileId(), authorIdentity.profileId());
-        boolean guest = Objects.isNull(like.getProfileId()) && Objects.equals(like.getGuestUuid(), authorIdentity.guestUuid());
+    private static boolean isOwner(Like like, Passport passport){
+        boolean member = Objects.isNull(like.getGuestUuid()) && Objects.equals(like.getProfileId(), passport.userId());
+        boolean guest = Objects.isNull(like.getProfileId()) && Objects.equals(like.getGuestUuid(), passport.guestId());
 
         return member || guest;
     }

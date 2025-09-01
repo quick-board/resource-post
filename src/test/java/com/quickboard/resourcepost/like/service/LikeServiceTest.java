@@ -1,6 +1,8 @@
 package com.quickboard.resourcepost.like.service;
 
-import com.quickboard.resourcepost.common.dto.AuthorIdentity;
+import com.quickboard.resourcepost.common.security.dto.Passport;
+import com.quickboard.resourcepost.common.security.enums.AccountState;
+import com.quickboard.resourcepost.common.security.enums.PrincipalType;
 import com.quickboard.resourcepost.like.entity.Like;
 import com.quickboard.resourcepost.like.repository.LikeRepository;
 import com.quickboard.resourcepost.like.service.impl.LikeServiceImpl;
@@ -27,25 +29,25 @@ class LikeServiceTest {
 
     @Test
     void postLikeProcess() {
-        AuthorIdentity authorIdentity = new AuthorIdentity(100L, null);
+        Passport passport = Passport.authenticatedPassport(100L, PrincipalType.USER, AccountState.ACTIVE);
         Long postId = 1L;
         Mockito.when(entityManager.getReference(Post.class, postId)).thenReturn(new Post());
         Mockito.when(likeRepository.save(Mockito.any(Like.class))).thenReturn(new Like());
 
-        likeService.postLikeProcess(postId, authorIdentity);
+        likeService.postLikeProcess(postId, passport);
 
         Mockito.verify(likeRepository, Mockito.times(1)).save(Mockito.any(Like.class));
     }
 
     @Test
     void deleteLikeProcess() {
-        AuthorIdentity authorIdentity = new AuthorIdentity(100L, null);
+        Passport passport = Passport.authenticatedPassport(100L, PrincipalType.USER, AccountState.ACTIVE);
         Long postId = 1L;
-        Mockito.when(likeRepository.deleteByPostIdAndProfileId(postId, authorIdentity.profileId())).thenReturn(1);
+        Mockito.when(likeRepository.deleteByPostIdAndProfileId(postId, passport.userId())).thenReturn(1);
 
-        likeService.deleteLikeProcess(postId, authorIdentity);
+        likeService.deleteLikeProcess(postId, passport);
 
         Mockito.verify(likeRepository, Mockito.times(1))
-                .deleteByPostIdAndProfileId(postId, authorIdentity.profileId());
+                .deleteByPostIdAndProfileId(postId, passport.userId());
     }
 }

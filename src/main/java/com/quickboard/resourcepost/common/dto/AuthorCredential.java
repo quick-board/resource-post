@@ -1,4 +1,4 @@
 package com.quickboard.resourcepost.common.dto;
 
-public record AuthorCredential(Long profileId, String guestPassword) {
+public record AuthorCredential(String guestPassword) {
 }

@@ -1,6 +1,7 @@
 package com.quickboard.resourcepost.post.service.impl;
 
 import com.quickboard.resourcepost.common.dto.AuthorCredential;
+import com.quickboard.resourcepost.common.security.dto.Passport;
 import com.quickboard.resourcepost.post.dto.*;
 import com.quickboard.resourcepost.post.entity.Post;
 import com.quickboard.resourcepost.post.exception.impl.PostAuthorFormException;
@@ -36,70 +37,70 @@ public class PostServiceImpl implements PostService {
 
     @Transactional
     @Override
-    public void postPost(Long boardId, PostCreatePayload payload) {
-        AuthorCredential credential = payload.authorCredential();
-        PostCreate postCreate = payload.postCreate();
+    public Long postPost(Long boardId, PostCreate postCreate, Passport passport) {
 
         Post newObject = Post.builder()
                 .title(postCreate.title())
                 .content(postCreate.content())
                 .boardId(boardId)
-                .profileId(credential.profileId())
-                .guestPassword(credential.guestPassword())
+                .profileId(passport.userId())
+                .guestPassword(postCreate.guestPassword())
                 .build();
 
-        postRepository.save(newObject);
+        Post post = postRepository.save(newObject);
+
+        return post.getId();
     }
 
     @Transactional
     @Override
-    public void patchPost(Long postId, PostUpdatePayload payload) {
-        AuthorCredential credential = payload.authorCredential();
-        PostUpdate postUpdate = payload.postUpdate();
+    public Long patchPost(Long postId, PostUpdate postUpdate, Passport passport) {
 
-        if(!validateForm(credential)){
+        if(!validateForm(passport.userId(), postUpdate.guestPassword())){
             throw new PostAuthorFormException();
         }
 
         Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 
-        if(!isAuthor(post, credential)){
+        if(!isAuthor(post, passport.userId(), postUpdate.guestPassword())){
             throw new PostAuthorNotOwnerException();
         }
 
         post.setTitle(postUpdate.title());
         post.setContent(postUpdate.content());
+
+        return post.getId();
     }
 
     @Transactional
     @Override
-    public void deletePost(Long postId, AuthorCredential authorCredential) {
-        if(!validateForm(authorCredential)){
+    public void deletePost(Long postId, AuthorCredential authorCredential, Passport passport) {
+        if(!validateForm(passport.userId(), authorCredential.guestPassword())){
             throw new PostAuthorFormException();
         }
 
         Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 
-        if(!isAuthor(post, authorCredential)){
+        if(!isAuthor(post, passport.userId(), authorCredential.guestPassword())){
             throw new PostAuthorNotOwnerException();
         }
 
         postRepository.delete(post);
     }
 
-    private static boolean validateForm(AuthorCredential credential){
-        boolean member = Objects.nonNull(credential.profileId());
-        boolean guest = Objects.nonNull(credential.guestPassword());
+    private static boolean validateForm(Long profileId, String guestPassword){
+        boolean member = Objects.nonNull(profileId);
+        boolean guest = Objects.nonNull(guestPassword);
 
         return member != guest;
     }
 
-    private static boolean isAuthor(Post post, AuthorCredential credential){
+    private static boolean isAuthor(Post post, Long profileId, String guestPassword){
         boolean member = Objects.nonNull(post.getProfileId()) &&
-                Objects.equals(post.getProfileId(), credential.profileId());
+                Objects.equals(post.getProfileId(), profileId);
 
         boolean guest = Objects.nonNull(post.getGuestPassword()) &&
-                Objects.equals(post.getGuestPassword(),credential.guestPassword());
+                Objects.equals(post.getGuestPassword(), guestPassword);
 
         return  member || guest;
 
