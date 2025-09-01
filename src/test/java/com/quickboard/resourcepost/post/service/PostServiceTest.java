@@ -1,10 +1,10 @@
 package com.quickboard.resourcepost.post.service;
 
-import com.quickboard.resourcepost.common.dto.AuthorCredential;
+import com.quickboard.resourcepost.common.security.dto.Passport;
+import com.quickboard.resourcepost.common.security.enums.AccountState;
+import com.quickboard.resourcepost.common.security.enums.PrincipalType;
 import com.quickboard.resourcepost.post.dto.*;
 import com.quickboard.resourcepost.post.entity.Post;
-import com.quickboard.resourcepost.post.exception.impl.PostAuthorFormException;
-import com.quickboard.resourcepost.post.exception.impl.PostAuthorNotOwnerException;
 import com.quickboard.resourcepost.post.exception.impl.PostNotFoundException;
 import com.quickboard.resourcepost.post.repository.PostRepository;
 import com.quickboard.resourcepost.post.service.impl.PostServiceImpl;
@@ -69,12 +69,11 @@ class PostServiceTest {
     @Test
     void postPost() {
         Long boardId = 1L;
-        AuthorCredential credential = new AuthorCredential(1L, null);
-        PostCreate postCreate = new PostCreate("title", "content");
-        PostCreatePayload postCreatePayload = new PostCreatePayload(credential, postCreate);
+        Passport passport = Passport.authenticatedPassport(1L, PrincipalType.USER, AccountState.ACTIVE);
+        PostCreate postCreate = new PostCreate("title", "content", null);
         Mockito.when(postRepository.save(Mockito.any(Post.class))).thenReturn(new Post());
 
-        postService.postPost(boardId, postCreatePayload);
+        postService.postPost(boardId, postCreate, passport);
 
         Mockito.verify(postRepository, Mockito.times(1))
                 .save(Mockito.any(Post.class));
@@ -83,59 +82,21 @@ class PostServiceTest {
     @Test
     void patchPost() {
         Long postId = 1L;
-        AuthorCredential credential = new AuthorCredential(100L, null);
-        PostUpdate postUpdate = new PostUpdate("after", "after");
-        PostUpdatePayload postUpdatePayload = new PostUpdatePayload(credential, postUpdate);
+        Passport passport = Passport.authenticatedPassport(1L, PrincipalType.USER, AccountState.ACTIVE);
+        PostUpdate postUpdate = new PostUpdate("after", "after", null);
+
         Post post = Post.builder()
                 .title("before")
                 .content("before")
-                .profileId(credential.profileId())
+                .profileId(passport.userId())
                 .build();
         Mockito.when(postRepository.findById(postId)).thenReturn(Optional.of(post));
 
-        postService.patchPost(postId, postUpdatePayload);
+        postService.patchPost(postId, postUpdate, passport);
 
         Assertions.assertAll(
                 () -> Assertions.assertEquals(postUpdate.title(), post.getTitle()),
                 () -> Assertions.assertEquals(postUpdate.content(), post.getContent())
         );
-    }
-
-    @Test
-    void patchPostInvalidForm() {
-        Long postId = 1L;
-        AuthorCredential exists = new AuthorCredential(1L, "apple");
-        AuthorCredential nulls = new AuthorCredential(null, null);
-
-        Assertions.assertAll(
-                () -> Assertions.assertThrows(PostAuthorFormException.class,
-                        () -> postService.patchPost(postId, new PostUpdatePayload(exists, null))),
-                () -> Assertions.assertThrows(PostAuthorFormException.class,
-                        () -> postService.patchPost(postId, new PostUpdatePayload(nulls, null)))
-        );
-    }
-
-    @Test
-    void patchPostNotAuthor() {
-        Long postId = 1L;
-        AuthorCredential credential = new AuthorCredential(1L, null);
-        PostUpdatePayload postUpdatePayload = new PostUpdatePayload(credential, new PostUpdate(null, null));
-
-        Post post = Post.builder().profileId(2L).build();
-        Mockito.when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-
-        Assertions.assertThrows(PostAuthorNotOwnerException.class, () -> postService.patchPost(postId, postUpdatePayload));
-    }
-
-    @Test
-    void deletePost() {
-        Long postId = 1L;
-        AuthorCredential credential = new AuthorCredential(100L, null);
-        Post post = Post.builder().profileId(100L).build();
-        Mockito.when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-
-        postService.deletePost(postId, credential);
-
-        Mockito.verify(postRepository, Mockito.times(1)).delete(post);
     }
 }

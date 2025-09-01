@@ -1,8 +1,8 @@
 package com.quickboard.resourcepost.like.service;
 
-import com.quickboard.resourcepost.common.dto.AuthorIdentity;
+import com.quickboard.resourcepost.common.security.dto.Passport;
 
 public interface LikeService {
-    void postLikeProcess(Long postId, AuthorIdentity authorIdentity);
-    void deleteLikeProcess(Long postId, AuthorIdentity authorIdentity);
+    void postLikeProcess(Long postId, Passport passport);
+    void deleteLikeProcess(Long postId, Passport passport);
 }
