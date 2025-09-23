@@ -2,6 +2,7 @@ package com.quickboard.resourcepost.post.service.impl;
 
 import com.quickboard.resourcepost.common.dto.AuthorCredential;
 import com.quickboard.resourcepost.common.security.dto.Passport;
+import com.quickboard.resourcepost.common.security.enums.CallerType;
 import com.quickboard.resourcepost.post.dto.*;
 import com.quickboard.resourcepost.post.entity.Post;
 import com.quickboard.resourcepost.post.exception.impl.PostAuthorFormException;
@@ -10,6 +11,7 @@ import com.quickboard.resourcepost.post.exception.impl.PostNotFoundException;
 import com.quickboard.resourcepost.post.repository.PostRepository;
 import com.quickboard.resourcepost.post.service.PostService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
@@ -39,11 +42,17 @@ public class PostServiceImpl implements PostService {
     @Override
     public Long postPost(Long boardId, PostCreate postCreate, Passport passport) {
 
+        Long profileId = passport.callerType() == CallerType.END_USER ? passport.endUserDetails().profileId() : null;
+
+        if(!validateForm(profileId, postCreate.guestPassword())){
+            throw new PostAuthorFormException();
+        }
+
         Post newObject = Post.builder()
                 .title(postCreate.title())
                 .content(postCreate.content())
                 .boardId(boardId)
-                .profileId(passport.userId())
+                .profileId(profileId)
                 .guestPassword(postCreate.guestPassword())
                 .build();
 
@@ -56,13 +65,11 @@ public class PostServiceImpl implements PostService {
     @Override
     public Long patchPost(Long postId, PostUpdate postUpdate, Passport passport) {
 
-        if(!validateForm(passport.userId(), postUpdate.guestPassword())){
-            throw new PostAuthorFormException();
-        }
+        Long profileId = passport.callerType() == CallerType.END_USER ? passport.endUserDetails().profileId() : null;
 
         Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 
-        if(!isAuthor(post, passport.userId(), postUpdate.guestPassword())){
+        if(!isAuthor(post, profileId, postUpdate.guestPassword())){
             throw new PostAuthorNotOwnerException();
         }
 
@@ -75,13 +82,12 @@ public class PostServiceImpl implements PostService {
     @Transactional
     @Override
     public void deletePost(Long postId, AuthorCredential authorCredential, Passport passport) {
-        if(!validateForm(passport.userId(), authorCredential.guestPassword())){
-            throw new PostAuthorFormException();
-        }
+
+        Long profileId = passport.callerType() == CallerType.END_USER ? passport.endUserDetails().profileId() : null;
 
         Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 
-        if(!isAuthor(post, passport.userId(), authorCredential.guestPassword())){
+        if(!isAuthor(post, profileId, authorCredential.guestPassword())){
             throw new PostAuthorNotOwnerException();
         }
 

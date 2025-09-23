@@ -30,13 +30,7 @@ public class PostController {
     public Page<PostResponse> getAllPosts(@PathVariable("id") Long boardId,
                                           @ModelAttribute @ParameterObject PostSearchCondition searchCondition,
                                           @ParameterObject @PageableDefault(size = 20, sort = "created-at", direction = Sort.Direction.DESC)
-                                              Pageable pageable, HttpServletRequest request){
-        Iterator<String> iterator = request.getHeaderNames().asIterator();
-        while (iterator.hasNext()){
-            String headerName = iterator.next();
-            String value = request.getHeader(headerName);
-            log.info("key={} value={}", headerName, value);
-        }
+                                              Pageable pageable){
         return postService.searchAllPost(boardId, searchCondition, pageable);
     }
 

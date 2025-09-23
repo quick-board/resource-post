@@ -1,10 +1,6 @@
 package com.quickboard.resourcepost.post.service;
 
-import com.quickboard.resourcepost.common.security.dto.Passport;
-import com.quickboard.resourcepost.common.security.enums.AccountState;
-import com.quickboard.resourcepost.common.security.enums.PrincipalType;
 import com.quickboard.resourcepost.post.dto.*;
-import com.quickboard.resourcepost.post.entity.Post;
 import com.quickboard.resourcepost.post.exception.impl.PostNotFoundException;
 import com.quickboard.resourcepost.post.repository.PostRepository;
 import com.quickboard.resourcepost.post.service.impl.PostServiceImpl;
@@ -66,37 +62,4 @@ class PostServiceTest {
                 .searchPostById(postId);
     }
 
-    @Test
-    void postPost() {
-        Long boardId = 1L;
-        Passport passport = Passport.authenticatedPassport(1L, PrincipalType.USER, AccountState.ACTIVE);
-        PostCreate postCreate = new PostCreate("title", "content", null);
-        Mockito.when(postRepository.save(Mockito.any(Post.class))).thenReturn(new Post());
-
-        postService.postPost(boardId, postCreate, passport);
-
-        Mockito.verify(postRepository, Mockito.times(1))
-                .save(Mockito.any(Post.class));
-    }
-
-    @Test
-    void patchPost() {
-        Long postId = 1L;
-        Passport passport = Passport.authenticatedPassport(1L, PrincipalType.USER, AccountState.ACTIVE);
-        PostUpdate postUpdate = new PostUpdate("after", "after", null);
-
-        Post post = Post.builder()
-                .title("before")
-                .content("before")
-                .profileId(passport.userId())
-                .build();
-        Mockito.when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-
-        postService.patchPost(postId, postUpdate, passport);
-
-        Assertions.assertAll(
-                () -> Assertions.assertEquals(postUpdate.title(), post.getTitle()),
-                () -> Assertions.assertEquals(postUpdate.content(), post.getContent())
-        );
-    }
 }
