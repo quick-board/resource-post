@@ -1,8 +1,8 @@
 package com.quickboard.resourcepost.like.service.impl;
 
 import com.quickboard.resourcepost.common.security.dto.Passport;
+import com.quickboard.resourcepost.common.security.enums.CallerType;
 import com.quickboard.resourcepost.like.entity.Like;
-import com.quickboard.resourcepost.like.exception.impl.LikeAuthorFormatException;
 import com.quickboard.resourcepost.like.exception.impl.LikeNotFoundException;
 import com.quickboard.resourcepost.like.repository.LikeRepository;
 import com.quickboard.resourcepost.like.service.LikeService;
@@ -23,34 +23,30 @@ public class LikeServiceImpl implements LikeService {
 
     @Transactional
     @Override
-    public void postLikeProcess(Long postId, Passport passport) {
-        if(!isValidFormat(passport)){
-            throw new LikeAuthorFormatException();
-        }
-
+    public Long postLikeProcess(Long postId, Passport passport) {
         Post refPost = entityManager.getReference(Post.class, postId);
+        Long profileId = passport.callerType() == CallerType.END_USER ? passport.endUserDetails().profileId() : null;
+        String guestUuid = passport.callerType() == CallerType.ANONYMOUS ? passport.anonymousDetails().guestId() : null;
         Like newObject = Like.builder()
                 .post(refPost)
-                .profileId(passport.userId())
-                .guestUuid(passport.guestId())
+                .profileId(profileId)
+                .guestUuid(guestUuid)
                 .build();
 
-        likeRepository.save(newObject);
+        Like saved = likeRepository.save(newObject);
+        return saved.getId();
     }
 
     @Transactional
     @Override
     public void deleteLikeProcess(Long postId, Passport passport) {
-        if(!isValidFormat(passport)){
-            throw new LikeAuthorFormatException();
-        }
-        int result;
+        int result = 0;
 
-        if(Objects.nonNull(passport.userId())){
-            result = likeRepository.deleteByPostIdAndProfileId(postId, passport.userId());
+        if(passport.callerType() == CallerType.END_USER){
+            result = likeRepository.deleteByPostIdAndProfileId(postId, passport.endUserDetails().profileId());
         }
-        else {
-            result = likeRepository.deleteByPostAndGuestUuid(postId, passport.guestId());
+        else if(passport.callerType() == CallerType.ANONYMOUS){
+            result = likeRepository.deleteByPostAndGuestUuid(postId, passport.anonymousDetails().guestId());
         }
 
         if(result >= 2){
@@ -62,17 +58,13 @@ public class LikeServiceImpl implements LikeService {
 
     }
 
-    private static boolean isValidFormat(Passport passport){
-        boolean isMember = Objects.nonNull(passport.userId());
-        boolean isGuest = Objects.nonNull(passport.guestId());
-
-        return isMember != isGuest;
-    }
-
     private static boolean isOwner(Like like, Passport passport){
-        boolean member = Objects.isNull(like.getGuestUuid()) && Objects.equals(like.getProfileId(), passport.userId());
-        boolean guest = Objects.isNull(like.getProfileId()) && Objects.equals(like.getGuestUuid(), passport.guestId());
-
-        return member || guest;
+        if(passport.callerType() == CallerType.ANONYMOUS){
+            return like.getGuestUuid().equals(passport.anonymousDetails().guestId());
+        }
+        else if (passport.callerType() == CallerType.END_USER) {
+            return like.getProfileId().equals(passport.endUserDetails().profileId());
+        }
+        return false;
     }
 }

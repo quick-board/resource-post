@@ -1,20 +1,42 @@
 package com.quickboard.resourcepost.common.security.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.quickboard.resourcepost.common.security.enums.AccountState;
-import com.quickboard.resourcepost.common.security.enums.PrincipalType;
+import com.quickboard.resourcepost.common.security.enums.CallerType;
+import com.quickboard.resourcepost.common.security.enums.Role;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record Passport(
-    Long userId,
-    String guestId,
-    PrincipalType principalType,
-    AccountState accountState,
-    boolean authenticated
+        CallerType callerType,
+        AnonymousDetails anonymousDetails,
+        EndUserDetails endUserDetails,
+        ServiceDetails serviceDetails
 ) {
-    public static Passport authenticatedPassport(Long userId, PrincipalType principalType, AccountState accountState){
-        return new Passport(userId, null, principalType, accountState, true);
+    public static Passport anonymousPassport(String guestId, String ip){
+        return new Passport(
+                CallerType.ANONYMOUS,
+                new AnonymousDetails(guestId, ip),
+                null,
+                null
+        );
     }
 
-    public static Passport unauthenticated(String guestId){
-        return new Passport(null, guestId, PrincipalType.ANONYMOUS, null, false);
+    public static Passport endUserPassport(Long accountId, AccountState accountState, Role role, Long profileId, String nickname){
+        return new Passport(
+                CallerType.END_USER,
+                null,
+                new EndUserDetails(accountId, accountState, role, profileId, nickname),
+                null
+        );
     }
+
+    public static Passport servicePassport(String serviceName, String clientRequestPath){
+        return new Passport(
+                CallerType.SERVICE,
+                null,
+                null,
+                new ServiceDetails(serviceName, clientRequestPath)
+        );
+    }
+
 }

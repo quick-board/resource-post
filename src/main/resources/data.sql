@@ -1,14 +1,14 @@
 -- 회원 작성자
 INSERT INTO posts (title, content, board_id, profile_id, created_at)
 VALUES
-('전체 game', '회원이 작성한 내용입니다.', 1, 1, '2024-07-01 10:00:00'),
-('전체 health', '또 다른 회원이 작성한 내용입니다.', 1, 2, '2024-07-01 10:01:00');
+('전체 game', '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"회원작성글1"}]}]}', 1, 1, '2024-07-01 10:00:00'),
+('전체 health', '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"회원작성글2"}]}]}', 1, 2, '2024-07-01 10:01:00');
 
 -- 비회원 작성자
 INSERT INTO posts (title, content, board_id, guest_password, created_at)
 VALUES
-('전체 game steam', '비회원이 작성한 게시글입니다.', 1, '1234', '2024-07-01 10:02:00'),
-('전체 health protein', '또 다른 비회원 게시글입니다.', 1, 'abcd', '2024-07-01 10:03:00');
+('전체 game steam', '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"비회원작성글1"}]}]}', 1, '1234', '2024-07-01 10:02:00'),
+('전체 health protein', '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"비회원작성글2"}]}]}', 1, 'abcd', '2024-07-01 10:03:00');
 
 -- 회원이 좋아요 누름
 INSERT INTO likes (post_id, profile_id, created_at)

@@ -15,9 +15,9 @@ public class LikeController {
 
     @PostMapping("/posts/{id}/likes")
     @ResponseStatus(HttpStatus.CREATED)
-    public void postLike(@PathVariable("id") Long postId,
+    public Long postLike(@PathVariable("id") Long postId,
                          Passport  passport){
-        likeService.postLikeProcess(postId, passport);
+        return likeService.postLikeProcess(postId, passport);
     }
 
     @DeleteMapping("/posts/{id}/likes/me")

@@ -1,7 +1,7 @@
 package com.quickboard.resourcepost.common.security.authentication;
 
 import com.quickboard.resourcepost.common.security.dto.Passport;
-import com.quickboard.resourcepost.common.security.enums.PrincipalType;
+import com.quickboard.resourcepost.common.security.enums.CallerType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,7 +18,18 @@ public class PassportAuthentication implements Authentication {
     private PassportAuthentication(Passport passport, boolean authenticated) {
         this.passport = passport;
         this.authenticated = authenticated;
-        authorities = List.of(new SimpleGrantedAuthority("ROLE_" + this.passport.principalType()));
+
+        String authorityRole;
+        if(passport.callerType() == CallerType.SERVICE){
+            authorityRole = passport.callerType().name();
+        }
+        else if (passport.callerType() == CallerType.END_USER) {
+            authorityRole = passport.endUserDetails().role().name();
+        } else {
+            authorityRole = CallerType.ANONYMOUS.name();
+        }
+
+        authorities = List.of(new SimpleGrantedAuthority("ROLE_" + authorityRole));
     }
 
     @Override
@@ -33,7 +44,20 @@ public class PassportAuthentication implements Authentication {
 
     @Override
     public Object getDetails() {
-        return null;
+        switch (passport.callerType()){
+            case SERVICE -> {
+                return passport.serviceDetails();
+            }
+            case END_USER -> {
+                return passport.endUserDetails();
+            }
+            case ANONYMOUS -> {
+                return passport.anonymousDetails();
+            }
+            default -> {
+                return null;
+            }
+        }
     }
 
     @Override
@@ -53,15 +77,20 @@ public class PassportAuthentication implements Authentication {
 
     @Override
     public String getName() {
-
-        if(passport.principalType() == PrincipalType.ADMIN){
-            return "admin:" + passport.guestId();
+        switch (passport.callerType()){
+            case SERVICE -> {
+                return "service:" + passport.serviceDetails().serviceName();
+            }
+            case END_USER -> {
+                return "end user:" + passport.endUserDetails().accountId();
+            }
+            case ANONYMOUS -> {
+                return "anonymous";
+            }
+            default -> {
+                return null;
+            }
         }
-        else if (passport.principalType() == PrincipalType.USER) {
-            return "user:" + passport.userId();
-        }
-
-        return "anonymous:" + passport.guestId();
     }
 
     public static PassportAuthentication authenticated(Passport passport){
